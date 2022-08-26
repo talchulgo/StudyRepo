@@ -1,0 +1,181 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+import pandas as pd
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from pandas.plotting import scatter_matrix
+
+matplotlib.rc('font', family='Malgun Gothic')
+
+
+# In[2]:
+
+
+df_fitness = pd.read_csv('Lv2_Pdata/FITNESS.csv', engine='python',encoding='CP949')
+df_fitness.head()
+
+
+# In[3]:
+
+
+df_count = df_fitness["GENDER"].value_counts()
+df_count.plot.bar(color=['orange','navy'],rot=0)
+
+
+# In[4]:
+
+
+df_count.plot.pie(ylabel='',startangle=90, counterclock=True, explode=(0,0.01),autopct='%0.01f%%',title='Gender분포')
+
+
+# In[5]:
+
+
+#연령대 빈도
+df_count = df_fitness['AGEGROUP'].value_counts()
+
+df_count.sort_index(inplace=True)
+df_count
+
+
+# In[6]:
+
+
+df_count.plot.bar(color=['blue','green','red'], rot=0)
+
+
+# In[7]:
+
+
+df_count.plot.pie(ylabel='',startangle=90, counterclock=True, explode=(0.01, 0.01, 0.01), autopct='%0.01f%%',title='AgeGroup 분포')
+
+
+# In[8]:
+
+
+df_groupby_total = df_fitness.groupby(['GENDER','AGEGROUP'], as_index=True).size()
+df_groupby_total.plot.bar(color=['blue','orange','green','red','purple','brown'],rot=0)
+
+
+# In[9]:
+
+
+df_groupby_total.plot.pie(ylabel='',startangle=90, counterclock=True, explode=(0,0,0,0.1,0.1,0), autopct='%0.01f%%',title='Gender & AgeGroup 분포')
+
+
+# In[10]:
+
+
+df_fitness_num = df_fitness.select_dtypes(include='number')
+df_fitness_num.head(30)
+
+
+# In[11]:
+
+
+df_fitness_num = df_fitness.select_dtypes(include='number')
+df_fitness_xnum = df_fitness_num[df_fitness_num.columns.difference(['OXY'])]
+df_fitness_xnum.hist(layout=(2,3), figsize=(10,5), grid=False)
+#df_fitness_num.hist(layout=(2,4), figsize=(10,5), grid=False)
+
+
+# In[12]:
+
+
+df_fitness.OXY.hist(grid=False, range=(30,65))
+plt.title('OXY분포', c='blue', fontweight='bold')
+
+
+# In[13]:
+
+
+df_fitness.hist(column='OXY', by='GENDER', figsize=(10,4), range=(30,65), xrot=0)
+
+
+# In[14]:
+
+
+df_fitness.boxplot('OXY', showmeans=True, color='blue')
+df_fitness.boxplot(column='OXY', by='GENDER', showmeans=True, color='blue')
+plt.ylabel('OXY')
+plt.title('')
+
+
+# In[15]:
+
+
+for i in range(len(df_fitness_xnum.columns)):
+    df_fitness.plot.scatter(x=df_fitness_xnum.columns[i], y='OXY', c='blue', s=10)
+
+
+# In[16]:
+
+
+df_fitness.plot.scatter(x='RUNTIME', y='OXY', c=pd.Categorical(df_fitness.GENDER).codes, cmap='tab20b', s=10)
+
+
+# In[17]:
+
+
+scatter_matrix(df_fitness, figsize=(10,10), diagonal='hist')
+
+
+# In[23]:
+
+
+len(df_fitness_xnum.columns)
+
+
+# In[25]:
+
+
+for i in range(len(df_fitness_xnum.columns)):
+    sns.kdeplot(df_fitness_xnum[df_fitness_xnum.columns[i]],df_fitness['OXY'],shade=False)
+    sns.scatterplot(x=df_fitness_xnum.columns[i], y='OXY', data=df_fitness)
+
+
+# In[28]:
+
+
+df_fitness_xobj = df_fitness.select_dtypes(include='object').iloc[:,1:3]
+df_fitness_xobj
+
+
+# In[34]:
+
+
+for i in range(len(df_fitness_xobj.columns)):
+    df_fitness.boxplot(column='OXY', by=df_fitness_xobj.columns[i], showmeans=True, color='blue')
+    plt.ylabel('OXY')
+    plt.title('')
+    plt.show()
+
+df_fitness.boxplot(column='OXY', by=['GENDER','AGEGROUP'],showmeans=True, color='blue')
+plt.title('')
+
+
+# In[41]:
+
+
+df_fitness_yxobj = df_fitness.groupby(['GENDER','AGEGROUP'],as_index=False).agg(['mean','std']).loc[:,'OXY']
+df_fitness_yxobj
+
+
+# In[42]:
+
+
+df_fitness_yxobj.style.background_gradient(axis=0)
+
+
+# In[43]:
+
+
+df_fitness.groupby(['GENDER','AGEGROUP'],as_index=False).agg('mean').pivot('GENDER','AGEGROUP','OXY').style.background_gradient(axis=None)
+
